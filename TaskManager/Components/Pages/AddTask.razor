@@ -1,0 +1,65 @@
+﻿@page "/AddNewTask"
+
+@using TaskManager.Domain.Enums
+@inject ITaskRepository Repository
+@inject NavigationManager Navigation
+<PageTitle>
+    Add New Task
+</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-6">
+        <EditForm method="post" FormName="AddTaskForm" OnValidSubmit="AddTasks" Model="Task" autocomplete="off">
+            <h3>Add New Task</h3>
+            <div class="form-group">
+                <label for="title">Title</label>
+                <InputText id="title" @bind-Value="Task.Title" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="author">Author</label>
+                <InputText id="author" @bind-Value="Task.Author" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="details">Details</label>
+                <InputText id="details" @bind-Value="Task.Details" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="createdDate">Created Date</label>
+                <InputDate id="createdDate" @bind-Value="Task.CreatedDate" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="TaskPriority">Task Priority</label>
+                <InputSelect id="TaskPriority" @bind-Value="Task.TaskPriority" class="form-control">
+                    <option value="0">Select Priority</option>
+                    @foreach (var priority in Enum.GetValues(typeof(TaskPriority)))
+                    {
+                        <option value="@priority">@priority.ToString()</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary shadow-none">Add</button>
+                <a href="/" class="btn btn-secondary shadow-none ms-3" data-enhance-nav="false">Back To List</a>
+            </div>
+
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public EntitiesTask.Task Task { get; set; } = new();
+
+    private async Task AddTasks()
+    {
+        await Repository.AddAsync(Task);
+        Navigation.NavigateTo("/");
+    }
+}

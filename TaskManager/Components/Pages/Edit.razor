@@ -1,0 +1,79 @@
+﻿@page "/edit/{id:int}"
+@inject ITaskRepository Repository
+@inject NavigationManager Navigation
+<PageTitle>
+    Edit Task
+</PageTitle>
+@if (Task is not null)
+{
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <EditForm method="post" FormName="EditTaskForm" OnValidSubmit="EditTask" Model="Task" autocomplete="off">
+                    <h3>Edit Task @Id</h3>
+                    <input type="hidden" name="Task.Id" value="@Task.Id" />
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <InputText id="title" @bind-Value="Task.Title" class="form-control form-control-lg" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="author" class="form-label">Author</label>
+                        <InputText id="author" @bind-Value="Task.Author" class="form-control form-control-lg" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="details" class="form-label">Details</label>
+                        <InputText id="details" @bind-Value="Task.Details" class="form-control form-control-lg" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="createdDate" class="form-label">Created Date</label>
+                        <InputDate id="createdDate" @bind-Value="Task.CreatedDate" class="form-control form-control-lg" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="TaskPriority" class="form-label">Task Priority</label>
+                        <InputSelect id="TaskPriority" @bind-Value="Task.TaskPriority" class="form-control form-control-lg">
+                            <option value="0">Selected Priority</option>
+                            @foreach (var priority in Enum.GetValues(typeof(TaskPriority)))
+                            {
+                                <option value="@priority">@priority.ToString()</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary shadow-none">Submit</button>
+                        <a href="/" class="btn btn-secondary shadow-none ms-3">Back To List</a>
+                    </div>
+
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public EntitiesTask.Task? Task { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Task ??= await Repository.GetByIdAsync(Id);
+    }
+
+    private async Task EditTask()
+    {
+        if (Task is not null)
+        {
+            await Repository.UpdateAsync(Task);
+            Navigation.NavigateTo("/");
+        }
+    }
+}

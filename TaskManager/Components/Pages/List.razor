@@ -1,0 +1,90 @@
+﻿@page "/"
+@inject ITaskRepository Repository
+@inject NavigationManager Navigation
+@attribute [StreamRendering]
+<PageTitle>
+    Task List
+</PageTitle>
+<div class="col-6">
+    <a href="AddNewTask" class="btn btn-primary shadow-none mb-3">
+        Add New
+    </a>
+</div>
+@if (tasks != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Details</th>
+                <th>Author</th>
+                <th>Created Date</th>
+                <th>Priority</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var task in tasks)
+            {
+                <tr>
+                    <td>@task.Title</td>
+                    <td>@task.Details</td>
+                    <td>@task.Author</td>
+                    <td>@task.CreatedDate?.ToString("MMM dd, yyyy")</td>
+                    <td>@task.TaskPriority</td>
+                    <td>
+                        <a href="edit/@task.Id" class="btn btn-warning shadow-none">
+                            Edit
+                        </a>
+                        
+                    </td>
+
+                    <td>
+                        <button @onclick="() => DeleteTask(task.Id)" class="btn btn-danger shadow-none ms-3">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+else
+{
+    <p>Loading tasks...</p>
+}
+<!-- <DeleteConfirmDialog Show="showConfirmDialog" OnCancel="CancelDelete" OnOK="DeleteTask"> </DeleteConfirmDialog>-->
+
+@code {
+    private bool showConfirmDialog;
+
+    private List<EntitiesTask.Task>? tasks;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        tasks = await Repository.GetAllAsync();
+    }
+
+    private async Task DeleteTask(int id)
+    {
+        await Repository.DeleteByIdAsync(id);
+        tasks = await Repository.GetAllAsync(); 
+
+    }
+
+    private void OpenConfirmDialog()
+    {
+        showConfirmDialog = true;
+    }
+    private void CancelDelete()
+    {
+        showConfirmDialog = false;
+    }
+  
+
+
+}
